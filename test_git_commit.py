@@ -1,3 +1,5 @@
+import argparse
+
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
 import sys
@@ -23,9 +25,20 @@ prompt_0 = """
 prompt_dict = {'prompt_0': prompt_0, 'prompt_1': prompt_1}
 
 
+def create_parser():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--style', '-s', default='default')
+    parser.add_argument('--diff', '-d', required=True)
+    parser.add_argument('--new_file')
+    parser.add_argument('--rename_file')
+
+    return parser.parse_args()
+
+
 def generate_commit_message(diff_files, prompt_txt):
 
-    print(prompt_text)
+    print(prompt_txt)
 
     git_diff = diff_files[0]
 
@@ -53,10 +66,10 @@ def read_file(ext_file):
 
 if __name__ == "__main__":
 
-    prompt_style = sys.argv[1]
+    params = create_parser()
 
-    change_input = [read_file(file) for file in sys.argv[2:]]
+    change_input = [params.diff, params.new_file, params.rename_file]
 
-    commit_msg = generate_commit_message(change_input, prompt_dict[prompt_style])
+    commit_msg = generate_commit_message(change_input, prompt_dict[params.style])
 
     print(commit_msg)
