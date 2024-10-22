@@ -12,6 +12,14 @@ prompt_1 = """
     git_diff: {git_diff}
     """
 
+prompt_0 = """
+    You are a programming expert. Please provide a concise summary of the following code snippet:
+    Code:
+    {git_diff}
+    
+    Summary:
+    """
+
 
 def generate_commit_message(git_diff, prompt_txt):
 
@@ -23,19 +31,26 @@ def generate_commit_message(git_diff, prompt_txt):
     )
 
     code_summary_chain = prompt | model
-    commit_message = code_summary_chain.invoke(git_diff)
+    commit_message = code_summary_chain.invoke(git_diff[0])
 
     return commit_message
+
+
+def read_file(ext_file):
+
+    with open(ext_file) as f:
+
+        file_input = f.read()
+
+    return file_input
 
 
 if __name__ == "__main__":
 
     prompt_style = sys.argv[1]
 
-    file = open("test_data/diff.txt", "r")
-    diff_input = file.read()
-    file.close()
+    change_input = [read_file(file) for file in sys.argv[2:]]
 
-    commit_msg = generate_commit_message(diff_input, prompt_style)
+    commit_msg = generate_commit_message(change_input, prompt_style)
 
     print(commit_msg)
