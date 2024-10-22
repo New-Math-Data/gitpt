@@ -2,7 +2,12 @@ import argparse
 
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
-import sys
+
+MODEL = 'gemma2'
+TEMP = 0
+TOP_P = 0.5
+TOP_K = 10
+ollama_model = OllamaLLM(model=MODEL, temperature=TEMP, top_p=TOP_P, top_k=TOP_K)
 
 
 prompt_1 = """
@@ -15,51 +20,83 @@ prompt_1 = """
     """
 
 prompt_0 = """
-    You are a programming expert. Please provide a concise summary of the following code snippet:
-    Code:
-    {git_diff}
+    You are a programming expert. Please provide a concise summary of the following code changes. I will provide the
+    git diff, a list of new files added, and a list of files renamed. 
+    git diff: {git_diff}
+    new files: {new_files}
+    renamed files: {renamed_files}
     
-    Summary:
+    If the new files list or the renamed files list just says the word none, please ignore those respective changes in 
+    the summary. If a deleted file shows up in the renamed files list, treat the deleted file as a renamed file in the
+    summary.
+    """
+
+char_prompt = """
+    Please summarize this message into {char_length} characters or less:
+    {verbose_summary}
     """
 
 prompt_dict = {'prompt_0': prompt_0, 'prompt_1': prompt_1}
 
 
 def create_parser():
+
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--style', '-s', default='default')
+    parser.add_argument('--char_length', '-c', default='50')
     parser.add_argument('--diff', '-d', required=True)
-    parser.add_argument('--new_file')
-    parser.add_argument('--rename_file')
+    parser.add_argument('--length', '-l', default='concise')
+    parser.add_argument('--new_files')
+    parser.add_argument('--renamed_files')
+    parser.add_argument('--style', '-s', default='prompt_0')
 
     return parser.parse_args()
 
 
-def generate_commit_message(diff_files, prompt_txt):
-
-    print(prompt_txt)
-
-    git_diff = diff_files[0]
-
-    model = OllamaLLM(model="gemma2", temperature=0, top_p=0.5, top_k=10)
+def generate_concise_message(verbose_msg, num_of_chars):
 
     prompt = PromptTemplate(
-        input_variables=["git_diff"],
+        input_variables=['char_length', 'verbose_summary'],
+        template=char_prompt
+    )
+
+    code_summary_chain = prompt | ollama_model
+    concise_summary = code_summary_chain.invoke({
+        'char_length': num_of_chars,
+        'verbose_summary': verbose_msg
+    })
+
+    return concise_summary
+
+
+def generate_verbose_message(diff_files, prompt_txt):
+
+    git_diff, new_files, renamed_files = diff_files
+
+    prompt = PromptTemplate(
+        input_variables=["git_diff", "new_files", "renamed_files"],
         template=prompt_txt
     )
 
-    code_summary_chain = prompt | model
-    commit_message = code_summary_chain.invoke(git_diff)
+    code_summary_chain = prompt | ollama_model
+    verbose_summary = code_summary_chain.invoke({
+        "git_diff": git_diff,
+        "new_files": new_files,
+        "renamed_files": renamed_files
+    })
 
-    return commit_message
+    return verbose_summary
 
 
 def read_file(ext_file):
 
-    with open(ext_file) as f:
+    file_input = ''
 
-        file_input = f.read()
+    if ext_file is not None:
+
+        with open(ext_file) as f:
+
+            file_input = f.read()
 
     return file_input
 
@@ -68,8 +105,18 @@ if __name__ == "__main__":
 
     params = create_parser()
 
-    change_input = [params.diff, params.new_file, params.rename_file]
+    change_input = [read_file(params.diff), read_file(params.new_files), read_file(params.renamed_files)]
 
-    commit_msg = generate_commit_message(change_input, prompt_dict[params.style])
+    print(f'Using the following style: {params.style}')
+    verbose_message = generate_verbose_message(change_input, prompt_dict[params.style])
 
-    print(commit_msg)
+    if params.length != 'verbose':
+
+        print(f'Character length of commit message - {params.char_length}')
+        commit_message = generate_concise_message(verbose_message, params.char_length)
+
+    else:
+
+        commit_message = verbose_message
+
+    print(commit_message)
