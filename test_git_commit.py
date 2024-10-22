@@ -20,8 +20,14 @@ prompt_0 = """
     Summary:
     """
 
+prompt_dict = {'prompt_0': prompt_0, 'prompt_1': prompt_1}
 
-def generate_commit_message(git_diff, prompt_txt):
+
+def generate_commit_message(diff_files, prompt_txt):
+
+    print(prompt_text)
+
+    git_diff = diff_files[0]
 
     model = OllamaLLM(model="gemma2", temperature=0, top_p=0.5, top_k=10)
 
@@ -31,7 +37,7 @@ def generate_commit_message(git_diff, prompt_txt):
     )
 
     code_summary_chain = prompt | model
-    commit_message = code_summary_chain.invoke(git_diff[0])
+    commit_message = code_summary_chain.invoke(git_diff)
 
     return commit_message
 
@@ -51,6 +57,6 @@ if __name__ == "__main__":
 
     change_input = [read_file(file) for file in sys.argv[2:]]
 
-    commit_msg = generate_commit_message(change_input, prompt_style)
+    commit_msg = generate_commit_message(change_input, prompt_dict[prompt_style])
 
     print(commit_msg)
