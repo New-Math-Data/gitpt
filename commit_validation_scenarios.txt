@@ -1,0 +1,7 @@
+1. File modified.
+2. File renamed.
+3. File deleted.
+4. File added.
+5. Combination of multiple actions.
+4. Nothing to commit.
+5. Including flags (for imperative tone? for branch name?)
