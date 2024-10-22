@@ -1,5 +1,6 @@
 import click
 from spinner import spinner
+from test_git_commit import generate_commit_message
 import time
 
 
