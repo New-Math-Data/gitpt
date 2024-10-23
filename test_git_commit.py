@@ -24,8 +24,6 @@ prompt_0 ="""
     You are a programming expert. Please provide a concise summary of the following code changes. I will provide the
     git diff, a list of new files added, and a list of files renamed. 
     git diff: {git_diff}
-    new files: {new_files}
-    renamed files: {renamed_files}
     
     If the new files list or the renamed files list just says the word none, please ignore those respective changes in 
     the summary. If a deleted file shows up in the renamed files list, treat the deleted file as a renamed file in the
@@ -70,20 +68,18 @@ def generate_concise_message(verbose_msg, num_of_chars):
     return concise_summary
 
 
-def generate_verbose_message(diff_files, prompt_txt):
+def generate_verbose_message(diff_files, prompt_txt=prompt_0):
 
-    git_diff, new_files, renamed_files = diff_files
+    
 
     prompt = PromptTemplate(
-        input_variables=["git_diff", "new_files", "renamed_files"],
+        input_variables=["git_diff"],
         template=prompt_txt
     )
 
     code_summary_chain = prompt | ollama_model
     verbose_summary = code_summary_chain.invoke({
-        "git_diff": git_diff,
-        "new_files": new_files,
-        "renamed_files": renamed_files
+        "git_diff": diff_files
     })
 
     return verbose_summary
@@ -107,7 +103,7 @@ if __name__ == "__main__":
     if read_file(params.diff):
         change_input = [read_file(params.diff), read_file(params.new_files), read_file(params.renamed_files)]
     else:
-        diff = new_files = renamed_files = None
+        # diff = new_files = renamed_files = None
         bash_script = "./get_diffs.sh"
         result = subprocess.run([bash_script], capture_output=True, text=True, shell=True)
 
@@ -124,10 +120,10 @@ if __name__ == "__main__":
             print("Error getting git diffs:")
             print(result.stderr)
 
-        change_input = [diff,new_files,renamed_files]
+        # change_input = [diff,new_files,renamed_files]
     #print(change_input)
     print(f'Using the following style: {params.style}')
-    verbose_message = generate_verbose_message(change_input, prompt_dict[params.style])
+    verbose_message = generate_verbose_message(result, prompt_dict[params.style])
 
     if params.length != 'verbose':
 

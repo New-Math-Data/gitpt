@@ -1,8 +1,15 @@
 import click
 from spinner import spinner
-from test_git_commit import generate_commit_message
+import test_git_commit
 import time
+import os
+import subprocess
 
+
+@click.confirmation_option(prompt='Are you ready to commit with this message')
+def commit_changes(message):
+    # Run Bash Script
+    click.echo(f'You have commited with the following message {message}')
 
 @click.command()
 @click.option('--style', '-s', type=click.Choice(['professional', 'imperative', 'funny'], case_sensitive=False), 
@@ -44,6 +51,7 @@ def commit(verbose, length, branch, diff, diff_path, style):
     # You can add logic here to pass these options to your scripts
     if verbose:
         click.echo(f"\nVerbose mode enabled.")
+        
 
     # Placeholder for calling the bash or Python scripts for generating the message
     # e.g., subprocess.call(["bash_script.sh", style, length, branch, diff_path])
@@ -53,9 +61,16 @@ def commit(verbose, length, branch, diff, diff_path, style):
 
     try:
         # Connect to llm to get response
-        time.sleep(5)
+        result = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
+        verbose_message = test_git_commit.generate_verbose_message(result)
+        concise_message = test_git_commit.generate_concise_message(verbose_message, length)
+        
     finally:
         stop_spinner.set()
+        commit_changes(concise_message)
+        # click.echo(concise_message)
         click.echo('\nTask completed')
+
+
 
 
