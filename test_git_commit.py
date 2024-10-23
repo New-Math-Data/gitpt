@@ -2,6 +2,7 @@ import argparse
 
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
+import subprocess
 
 MODEL = 'gemma2'
 TEMP = 0
@@ -44,7 +45,7 @@ def create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--char_length', '-c', default='50')
-    parser.add_argument('--diff', '-d', required=True)
+    parser.add_argument('--diff', '-d')
     parser.add_argument('--length', '-l', default='concise')
     parser.add_argument('--new_files')
     parser.add_argument('--renamed_files')
@@ -100,13 +101,31 @@ def read_file(ext_file):
 
     return file_input
 
-
 if __name__ == "__main__":
 
     params = create_parser()
+    if read_file(params.diff):
+        change_input = [read_file(params.diff), read_file(params.new_files), read_file(params.renamed_files)]
+    else:
+        diff = new_files = renamed_files = None
+        bash_script = "./get_diffs.sh"
+        result = subprocess.run([bash_script], capture_output=True, text=True, shell=True)
 
-    change_input = [read_file(params.diff), read_file(params.new_files), read_file(params.renamed_files)]
+        if result.returncode == 0:
+            output = result.stdout.strip()
+            sections = output.split("\n\n")
+            if len(sections)>=1:
+                diff = sections[0]
+            if len(sections) >= 2:
+                new_files = sections[1]
+            if len(sections) >= 3:
+                renamed_files = sections[2]
+        else:
+            print("Error getting git diffs:")
+            print(result.stderr)
 
+        change_input = [diff,new_files,renamed_files]
+    #print(change_input)
     print(f'Using the following style: {params.style}')
     verbose_message = generate_verbose_message(change_input, prompt_dict[params.style])
 
