@@ -20,7 +20,7 @@ prompt_1 = """
     git_diff: {git_diff}
     """
 
-prompt_0 = """
+prompt_0 ="""
     You are a programming expert. Please provide a concise summary of the following code changes. I will provide the
     git diff, a list of new files added, and a list of files renamed. 
     git diff: {git_diff}
