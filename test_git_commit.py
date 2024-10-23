@@ -2,12 +2,12 @@ from langchain_core.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
 import sys
 
-def generate_commit_message(git_diff):
+def generate_commit_message(git_diff:str, style:str, length:int, branch:str):
     model= OllamaLLM(model="gemma2",temperature=0, top_p=0.5, top_k=10)
 
     prompt_template = """
-    Write concise, informative commit messages based on git diff: 
-    Start with a summary in imperative mood, explain the 'why' behind changes, 
+    Write concise, informative commit messages based on the provided git diff: 
+    Start with a summary in the following style: {style}, explain the 'why' behind changes, 
     keep the summary under 50 characters. 
     Use bullet points for multiple changes, and reference related issues or tickets. 
     What you write will be passed to git commit -m "[message]"

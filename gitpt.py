@@ -52,6 +52,7 @@ def commit(verbose, length, branch, diff, diff_path, style):
     stop_spinner = spinner()
 
     try:
+        # Connect to llm to get response
         time.sleep(5)
     finally:
         stop_spinner.set()
