@@ -1,6 +1,6 @@
 import click
 from spinner import spinner
-import test_git_commit
+import llm_helper
 import subprocess
 import os
 
@@ -14,7 +14,8 @@ import os
 @click.option('--branch', '-b', type=click.STRING, help='The branch name to include in the commit message.')
 @click.option('--diff', type=click.STRING, help='The git diff as text to analyze for generating the commit message.')
 @click.option('--diff_path', type=click.Path(exists=True), help='The path to a file containing the git diff.')
-def create_message(verbose, length, branch, diff, diff_path, style):
+@click.option('--model', '-m', type=click.Choice(['chat-gpt', 'ollama'], case_sensitive=False), help="The model you'd like to use, defaults to local install of ollama", multiple=True, default=["ollama"])
+def create_message(verbose, length, branch, diff, diff_path, style, model):
     """
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
@@ -32,6 +33,9 @@ def create_message(verbose, length, branch, diff, diff_path, style):
         click.echo(f"Diff (text): {diff}")
         # Set diff text to diff_text variable
         diff_text = diff
+
+    if model:
+        click.echo(f"Using Model = {model[0]}")
         
     if diff_path:
         click.echo(f"Diff (file): {diff_path}")
@@ -55,22 +59,22 @@ def create_message(verbose, length, branch, diff, diff_path, style):
         if not diff_text:
             diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
         
-        verbose_message = test_git_commit.generate_verbose_message(diff_text)
+        verbose_message = llm_helper.generate_verbose_message(diff_text, style, model[0])
 
         if verbose:
             click.echo(f"Verbose Message: {verbose_message}")
 
-        concise_message = test_git_commit.generate_concise_message(verbose_message, length)
+        concise_message = llm_helper.generate_concise_message(verbose_message, length, model[0])
         
     finally:
         stop_spinner.set()
         click.echo(concise_message)
-        commit_changes(concise_message)
+        commit_changes(concise_message, verbose_message)
         click.echo('\nTask completed')
 
 
-@click.confirmation_option(prompt='Are you ready to commit with this message')
-def commit_changes(message):
+@click.confirmation_option(prompt='Are you ready to commit with this message?')
+def commit_changes(message, v_message):
     """Commit changes using message generated"""
     
     message = message if message != '' else os.environ['gitpt_message']
@@ -78,6 +82,7 @@ def commit_changes(message):
         click.confirm("Do you want to commit with this message?", abort=True)
         
         # Run Bash Script to commit using message
-        click.echo(f'You have commited with the following message {message}')
+        subprocess.run(["./commit.sh", message, v_message], text=True, shell=True)
+        click.echo(f'Changes commited with message: {message}')
 
 

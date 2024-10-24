@@ -1,14 +1,63 @@
-import argparse
-
 from langchain_core.prompts import PromptTemplate
-from langchain_ollama.llms import OllamaLLM
-import subprocess
+import os
 
-MODEL = 'gemma2'
-TEMP = 0
-TOP_P = 0.5
-TOP_K = 10
-ollama_model = OllamaLLM(model=MODEL, temperature=TEMP, top_p=TOP_P, top_k=TOP_K)
+def set_model(model):
+    TEMP = 0
+    TOP_P = 0.5
+    TOP_K = 10
+    if model == "chat-gpt":
+        # Check for API Key
+        if os.environ.get("OPENAI_API_KEY"):
+
+            from langchain_openai.llms import OpenAI
+
+            llm = OpenAI(model='gpt-3.5-turbo-instruct', 
+                        temperature=TEMP,
+                        api_key = os.environ.get("OPENAI_API_KEY"),
+                        top_p = TOP_P
+                        )
+            return llm
+        else:
+            print(f"Failed to get API Key, using Ollama")
+
+    # Use Ollama if no other model passed in
+    from langchain_ollama.llms import OllamaLLM
+
+    llm = OllamaLLM(model='gemma2', 
+                    temperature=TEMP, 
+                    top_p=TOP_P, 
+                    top_k=TOP_K
+                    )
+        
+    return llm
+
+prompt_2 = """
+# IDENTITY and PURPOSE
+
+You are an expert project manager and developer, and you specialize in creating {style} changed in a Git diff.
+
+# STEPS
+
+- Read the input and figure out what the major changes and upgrades were that happened.
+
+- Create a message that can be included within a git command to reflet the changes.
+
+- If there are a lot of changes include more bullets. If there are only a few changes, be more terse.
+
+# OUTPUT INSTRUCTIONS
+
+- Use conventional commits - i.e. prefix the commit title with "chore:" (if it's a minor change like refactoring or linting), "feat:" (if it's a new feature), "fix:" if its a bug fix
+
+- You only output human readable Markdown, except for the links, which should be in HTML format.
+
+- The output should be a message that will be included as part of a git command.
+
+- You can use write the message in a {style} manner.
+
+# INPUT:
+
+INPUT: {git_diff}
+"""
 
 
 prompt_1 = """
@@ -46,14 +95,16 @@ def create_parser():
     return parser.parse_args()
 
 
-def generate_concise_message(verbose_msg, num_of_chars):
+def generate_concise_message(verbose_msg, num_of_chars, model):
 
     prompt = PromptTemplate(
         input_variables=['char_length', 'verbose_summary'],
         template=char_prompt
     )
 
-    code_summary_chain = prompt | ollama_model
+    llm = set_model(model)
+
+    code_summary_chain = prompt | llm
     concise_summary = code_summary_chain.invoke({
         'char_length': num_of_chars,
         'verbose_summary': verbose_msg
@@ -62,18 +113,21 @@ def generate_concise_message(verbose_msg, num_of_chars):
     return concise_summary
 
 
-def generate_verbose_message(diff_files, prompt_txt=prompt_0):
+def generate_verbose_message(diff_files, style, model, prompt_txt=prompt_2):
 
     
 
     prompt = PromptTemplate(
-        input_variables=["git_diff"],
+        input_variables=["git_diff", "style"],
         template=prompt_txt
     )
 
-    code_summary_chain = prompt | ollama_model
+    llm = set_model(model)
+
+    code_summary_chain = prompt | llm
     verbose_summary = code_summary_chain.invoke({
-        "git_diff": diff_files
+        "git_diff": diff_files,
+        "style": style
     })
 
     return verbose_summary
@@ -92,6 +146,8 @@ def read_file(ext_file):
     return file_input
 
 if __name__ == "__main__":
+    import subprocess
+    import argparse
 
     params = create_parser()
     if read_file(params.diff):

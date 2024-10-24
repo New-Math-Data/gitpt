@@ -1,2 +1,3 @@
 langchain-ollama
+langchain-openai
 click>=8.1
