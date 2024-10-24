@@ -20,7 +20,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
     # Create diff_text to contain text from diff.
-    diff_text = None
+    diff_text = f""
 
     # Create Generator
     generator = CommentGenerator(model[0])
@@ -66,37 +66,37 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
 
     #Start Spinner
     stop_spinner = spinner()
-
+    message = ""
     try:
         # Connect to llm to get response
-        if not diff_text:
-            diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
+        if not diff_text.strip():
+            exit = False
+            diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True).stdout
 
-        if diff_text:
-            click.echo("No diff detected. Exiting...")
+        if not diff_text.strip():
+            click.echo("No diff detected. Be sure you stage your files with 'git add' before running this process. Exiting...")
             exit = True
             sys.exit(999)
 
-        verbose_message = generator.generate_verbose_message(diff_text, style, prompt_txt)
-
         if verbose:
-            click.echo(f"Verbose Message: {verbose_message}")
-
-        concise_message = generator.generate_short_message(verbose_message, length, short_prompt, style)
+            message = generator.generate_verbose_message(diff_text, style, prompt_txt)
+            click.echo(f"Verbose Message: {message}")
+        else:
+            message = generator.generate_short_message(diff_text, length, short_prompt, style)
         
 
     finally:
         stop_spinner.set()
         if not exit:
             try:
-                click.echo(concise_message)
-                commit_changes(concise_message, verbose_message)
+                click.echo(message)
+                commit_changes(message)
             except Exception as e:
                 click.echo(f'Task Aborted: {e}')
 
 
 @click.confirmation_option(prompt='Are you ready to commit with this message?')
-def commit_changes(message, v_message):
+def commit_changes(message):
     """Commit changes using message generated"""
     
     message = message if message != '' else os.environ['gitpt_message']
@@ -104,7 +104,7 @@ def commit_changes(message, v_message):
         click.confirm("Do you want to commit with this message?", abort=True)
         
         # Run Bash Script to commit using message
-        subprocess.run(["./commit.sh", message, v_message], text=True, shell=True)
+        subprocess.run(["./commit.sh", message], text=True, shell=True)
         click.echo(f'Changes commited with message: {message}')
 
 

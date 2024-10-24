@@ -1,3 +1,3 @@
 #!/bin/bash
-diff_output=$(git diff HEAD)
+diff_output=$(git diff --staged)
 echo "$diff_output"
