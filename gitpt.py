@@ -3,7 +3,7 @@ from spinner import spinner
 from llm_helper import CommentGenerator
 import subprocess
 import os
-
+import sys
 
 @click.group(invoke_without_command=True)
 @click.option('--style', '-s', type=click.Choice(['professional', 'imperative', 'funny'], case_sensitive=False), 
@@ -20,7 +20,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
     # Create diff_text to contain text from diff.
-    diff_text = None
+    diff_text = f""
 
     # Create Generator
     generator = CommentGenerator(model[0])
@@ -71,7 +71,15 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         # Connect to llm to get response
         if not diff_text:
             diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
-        
+            if not diff_text:
+                diff_text = f""
+
+        click.echo(f"Diff Text: ${diff_text}")
+
+        if not diff_text:
+            click.echo("No diff detected. Exiting...")
+            sys.exit(999)
+
         verbose_message = generator.generate_verbose_message(diff_text, style, prompt_txt)
 
         if verbose:
@@ -79,11 +87,12 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
 
         concise_message = generator.generate_short_message(verbose_message, length, short_prompt, style)
         
-    finally:
-        stop_spinner.set()
         click.echo(concise_message)
         commit_changes(concise_message, verbose_message)
         click.echo('\nTask completed')
+
+    finally:
+        stop_spinner.set()
 
 
 @click.confirmation_option(prompt='Are you ready to commit with this message?')
