@@ -72,7 +72,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         if not diff_text:
             diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
             
-            click.echo(f"Diff Text: {diff_text}")
+            click.echo(f"Diff Text: {diff_text.stdout}")
 
         if not diff_text:
             click.echo("No diff detected. Exiting...")
