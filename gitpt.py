@@ -1,32 +1,26 @@
 import click
 from spinner import spinner
 import test_git_commit
-import time
-import os
 import subprocess
+import os
 
 
-@click.confirmation_option(prompt='Are you ready to commit with this message')
-def commit_changes(message):
-    # Run Bash Script
-    click.echo(f'You have commited with the following message {message}')
-
-@click.command()
+@click.group(invoke_without_command=True)
 @click.option('--style', '-s', type=click.Choice(['professional', 'imperative', 'funny'], case_sensitive=False), 
               help='The style of the git commit message.', required=True)
 @click.option('--verbose', '-v', is_flag=True, default=False, help='Provide reasoning behind the commit message.')
 @click.option('--length', '-l', type=click.IntRange(min=50, max=80), default='80', 
               help='Specify the max length of the commit message (50 or 80 characters).')
-@click.option('--branch', '-b', type=str, help='The branch name to include in the commit message.')
-@click.option('--diff', type=str, help='The git diff as text to analyze for generating the commit message.')
+@click.option('--branch', '-b', type=click.STRING, help='The branch name to include in the commit message.')
+@click.option('--diff', type=click.STRING, help='The git diff as text to analyze for generating the commit message.')
 @click.option('--diff_path', type=click.Path(exists=True), help='The path to a file containing the git diff.')
-def commit(verbose, length, branch, diff, diff_path, style):
+def create_message(verbose, length, branch, diff, diff_path, style):
     """
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
-    # Predefined Python/bash scripts can be called here
-    # For demonstration purposes, we will just print out the options
-    
+    # Create diff_text to contain text from diff.
+    diff_text = None
+
     click.echo(f"Generating commit message with the following options:")
     click.echo(f"Style: {style}")
     click.echo(f"Max Length: {length} characters")
@@ -53,24 +47,37 @@ def commit(verbose, length, branch, diff, diff_path, style):
         click.echo(f"\nVerbose mode enabled.")
         
 
-    # Placeholder for calling the bash or Python scripts for generating the message
-    # e.g., subprocess.call(["bash_script.sh", style, length, branch, diff_path])
-    
     #Start Spinner
     stop_spinner = spinner()
 
     try:
         # Connect to llm to get response
-        result = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
-        verbose_message = test_git_commit.generate_verbose_message(result)
+        if not diff_text:
+            diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
+        
+        verbose_message = test_git_commit.generate_verbose_message(diff_text)
+
+        if verbose:
+            click.echo(f"Verbose Message: {verbose_message}")
+
         concise_message = test_git_commit.generate_concise_message(verbose_message, length)
         
     finally:
         stop_spinner.set()
+        click.echo(concise_message)
         commit_changes(concise_message)
-        # click.echo(concise_message)
         click.echo('\nTask completed')
 
 
+@click.confirmation_option(prompt='Are you ready to commit with this message')
+def commit_changes(message):
+    """Commit changes using message generated"""
+    
+    message = message if message != '' else os.environ['gitpt_message']
+    if message != '':
+        click.confirm("Do you want to commit with this message?", abort=True)
+        
+        # Run Bash Script to commit using message
+        click.echo(f'You have commited with the following message {message}')
 
 

@@ -8,7 +8,7 @@ setup(
     install_requires=["Click", "langchain-ollama"],
     entry_points={
         'console_scripts':[
-            'gitpt = gitpt:commit'
+            'gitpt = gitpt:create_message'
         ]
     }
 
