@@ -20,7 +20,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
     # Create diff_text to contain text from diff.
-    diff_text = f""
+    diff_text = None
 
     # Create Generator
     generator = CommentGenerator(model[0])
@@ -71,10 +71,8 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         # Connect to llm to get response
         if not diff_text:
             diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
-            if not diff_text:
-                diff_text = f""
-
-        click.echo(f"Diff Text: ${diff_text}")
+            
+            click.echo(f"Diff Text: {diff_text}")
 
         if not diff_text:
             click.echo("No diff detected. Exiting...")
