@@ -9,7 +9,7 @@
 
 # OUTPUT INSTRUCTIONS
 - Use a prefix to title the commit message with to overlay the most common theme of the message - i.e. "chore" or "feat" or "fix" or "bug" depending on the issues found.
-- The output should be a message that will be included as part of a git commant.
+- The output should only be a message that will be included as part of a git commit.
 - Write the message that conveys a tone of {style}.
 
 # INPUT:

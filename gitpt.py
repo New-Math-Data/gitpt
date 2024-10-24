@@ -74,7 +74,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
             
             click.echo(f"Diff Text: {diff_text.stdout}")
 
-        if not diff_text:
+        if diff_text:
             click.echo("No diff detected. Exiting...")
             sys.exit(999)
 
@@ -91,9 +91,8 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         try:
             click.echo(concise_message)
             commit_changes(concise_message, verbose_message)
-            click.echo('\nTask completed')
-        except:
-            click.echo('Failed to complete Task')
+        except Exception as e:
+            click.echo(f'Task Aborted: {e}')
 
 
 @click.confirmation_option(prompt='Are you ready to commit with this message?')
