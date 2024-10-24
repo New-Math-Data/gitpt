@@ -85,12 +85,15 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
 
         concise_message = generator.generate_short_message(verbose_message, length, short_prompt, style)
         
-        click.echo(concise_message)
-        commit_changes(concise_message, verbose_message)
-        click.echo('\nTask completed')
 
     finally:
         stop_spinner.set()
+        try:
+            click.echo(concise_message)
+            commit_changes(concise_message, verbose_message)
+            click.echo('\nTask completed')
+        except:
+            click.echo('Failed to complete Task')
 
 
 @click.confirmation_option(prompt='Are you ready to commit with this message?')
