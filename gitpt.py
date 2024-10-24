@@ -1,6 +1,6 @@
 import click
 from spinner import spinner
-import llm_helper
+from llm_helper import CommentGenerator
 import subprocess
 import os
 
@@ -21,6 +21,9 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
     """
     # Create diff_text to contain text from diff.
     diff_text = None
+
+    # Create Generator
+    generator = CommentGenerator(model[0])
 
     click.echo(f"Generating commit message with the following options:")
     click.echo(f"Style: {style}")
@@ -49,7 +52,17 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
     # You can add logic here to pass these options to your scripts
     if verbose:
         click.echo(f"\nVerbose mode enabled.")
-        
+
+    # Get prompts
+    with open('./prompts/prompt_txt.md', 'r') as prompt:
+        prompt_txt = prompt.read()
+        prompt.close()
+
+    with open('./prompts/small_prompt.md', 'r') as sp:
+        short_prompt = sp.read()
+        sp.close()
+
+       
 
     #Start Spinner
     stop_spinner = spinner()
@@ -59,12 +72,12 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         if not diff_text:
             diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True)
         
-        verbose_message = llm_helper.generate_verbose_message(diff_text, style, model[0])
+        verbose_message = generator.generate_verbose_message(diff_text, style, prompt_txt)
 
         if verbose:
             click.echo(f"Verbose Message: {verbose_message}")
 
-        concise_message = llm_helper.generate_concise_message(verbose_message, length, model[0])
+        concise_message = generator.generate_short_message(verbose_message, length, short_prompt, style)
         
     finally:
         stop_spinner.set()
