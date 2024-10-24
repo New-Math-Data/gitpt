@@ -76,6 +76,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
 
         if diff_text:
             click.echo("No diff detected. Exiting...")
+            exit = True
             sys.exit(999)
 
         verbose_message = generator.generate_verbose_message(diff_text, style, prompt_txt)
@@ -88,11 +89,12 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
 
     finally:
         stop_spinner.set()
-        try:
-            click.echo(concise_message)
-            commit_changes(concise_message, verbose_message)
-        except Exception as e:
-            click.echo(f'Task Aborted: {e}')
+        if not exit:
+            try:
+                click.echo(concise_message)
+                commit_changes(concise_message, verbose_message)
+            except Exception as e:
+                click.echo(f'Task Aborted: {e}')
 
 
 @click.confirmation_option(prompt='Are you ready to commit with this message?')
