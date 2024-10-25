@@ -9,7 +9,7 @@ import sys
 @click.option('--style', '-s', type=click.Choice(['professional', 'imperative', 'funny'], case_sensitive=False), 
               help='The style of the git commit message.', required=True)
 @click.option('--verbose', '-v', is_flag=True, default=False, help='Provide reasoning behind the commit message.')
-@click.option('--length', '-l', type=click.IntRange(min=50, max=80), default='80', 
+@click.option('--length', '-l', type=click.IntRange(min=50, max=72), default='50',
               help='Specify the max length of the commit message (50 or 80 characters).')
 @click.option('--branch', '-b', type=click.STRING, help='The branch name to include in the commit message.')
 @click.option('--diff', type=click.STRING, help='The git diff as text to analyze for generating the commit message.')
@@ -62,15 +62,14 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         short_prompt = sp.read()
         sp.close()
 
-       
 
     #Start Spinner
     stop_spinner = spinner()
     message = ""
     try:
         # Connect to llm to get response
+        exit = False
         if not diff_text.strip():
-            exit = False
             diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True).stdout
 
         if not diff_text.strip():

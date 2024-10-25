@@ -4,9 +4,9 @@ import os
 class CommentGenerator():
     def __init__(self, model):
         self.model = model
-        self.TEMP = 0
-        self.TOP_P = 0.5
-        self.TOP_K = 10
+        self.TEMP = 0.8
+        self.TOP_P = 0.9
+        self.TOP_K = 40
         self.llm = self.set_model(self.model)
 
     
