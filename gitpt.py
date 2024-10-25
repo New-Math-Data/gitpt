@@ -5,6 +5,9 @@ import subprocess
 import os
 import sys
 
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 @click.group(invoke_without_command=True)
 @click.option('--style', '-s', type=click.Choice(['professional', 'imperative', 'funny'], case_sensitive=False), 
               help='The style of the git commit message.', required=True)
@@ -54,11 +57,13 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         click.echo(f"\nVerbose mode enabled.")
 
     # Get prompts
-    with open('./prompts/prompt_txt.md', 'r') as prompt:
+    # f = open(os.path.join(__location__, 'bundled-resource.jpg'))
+
+    with open(os.path.join(__location__, './prompts/prompt_txt.md'), 'r') as prompt:
         prompt_txt = prompt.read()
         prompt.close()
 
-    with open('./prompts/small_prompt.md', 'r') as sp:
+    with open(os.path.join(__location__, './prompts/small_prompt.md'), 'r') as sp:
         short_prompt = sp.read()
         sp.close()
 
@@ -70,7 +75,7 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
         # Connect to llm to get response
         exit = False
         if not diff_text.strip():
-            diff_text = subprocess.run(['./get_diffs.sh'], capture_output=True, text=True, shell=True).stdout
+            diff_text = subprocess.run([os.path.join(__location__, './get_diffs.sh')], capture_output=True, text=True, shell=True).stdout
 
         if not diff_text.strip():
             click.echo("No diff detected. Be sure you stage your files with 'git add' before running this process. Exiting...")
