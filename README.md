@@ -11,5 +11,5 @@ Hackathon 4 - October 2024
 1. Activate virtual environemnt: `source venv/bin/activate`
 1. Install requirements: `pip install -r requirements.txt`
 1. CD into folder of project
-1. Install project into venv `pip install --editable.` Setup file will create keyword to utilize cli
+1. Install project into venv `pip install --editable .` Setup file will create keyword to utilize cli
 1. Type `gitpt` to interact with cli, `gitpt --help` to see available options to pass.
