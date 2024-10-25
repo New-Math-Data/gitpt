@@ -100,10 +100,12 @@ def commit_changes(message):
     
     message = message if message != '' else os.environ['gitpt_message']
     if message != '':
-        click.confirm("Do you want to commit with this message?", abort=True)
+        message = message.replace('"', '\\"').strip()
         
+        click.echo(f"Committing with message: {message}")
+        click.confirm("Do you want to commit with this message?", abort=True)
         # Run Bash Script to commit using message
-        subprocess.run(["./commit.sh", message], text=True, shell=True)
+        subprocess.run(["git", "commit", "-m", message], check=True)
         click.echo(f'Changes commited with message: {message}')
 
 
