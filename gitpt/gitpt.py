@@ -1,6 +1,6 @@
 import click
-from spinner import spinner
-from llm_helper import CommentGenerator
+from gitpt.utils.spinner import spinner
+from gitpt.utils.llm_helper import CommentGenerator
 import subprocess
 import os
 import sys
@@ -61,10 +61,12 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
 
     with open(os.path.join(__location__, './prompts/prompt_txt.md'), 'r') as prompt:
         prompt_txt = prompt.read()
+        print(prompt_txt)
         prompt.close()
 
     with open(os.path.join(__location__, './prompts/small_prompt.md'), 'r') as sp:
         short_prompt = sp.read()
+        print(short_prompt)
         sp.close()
 
 

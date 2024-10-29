@@ -2,8 +2,6 @@
 
 Hackathon 4 - October 2024
 
-1. `chmod +x commit.sh`
-1. `chmod +x get_diffs.sh`
 1. Download ollama from https://ollama.com/
 1. In the terminal run `ollama pull gemma2`
    ( the model will be downloaded into `~/.ollama/models/blobs` on mac)

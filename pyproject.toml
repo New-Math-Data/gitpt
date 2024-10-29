@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "gitpt"
+version = "0.1.0"
+description = "An LLM based git commit message creator."
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain-ollama = "^0.2.0"
+langchain-openai = "^0.2.4"
+click = ">=8.1"
+
+
+[tool.poetry.scripts]
+gitpt = "gitpt.gitpt:create_message"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
