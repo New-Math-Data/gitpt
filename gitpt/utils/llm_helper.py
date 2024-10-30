@@ -37,7 +37,7 @@ class CommentGenerator():
         elif self.llm == "claude":
             # Check for API Key
             if self.api_key != '':
-                from langchain_openai import ChatAnthropic
+                from langchain_anthropic import ChatAnthropic
 
                 try:
                     generator = ChatAnthropic(
