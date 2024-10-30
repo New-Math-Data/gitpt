@@ -11,6 +11,7 @@ langchain-ollama = "^0.2.0"
 langchain-openai = "^0.2.4"
 click = ">=8.1"
 langchain-core = "^0.3.13"
+langchain-anthropic = "^0.2.3"
 
 
 [tool.poetry.scripts]

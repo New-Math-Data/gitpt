@@ -132,20 +132,16 @@ def create_message(ctx, style, verbose, length, branch, diff, diff_path, llm, mo
             sys.exit(999)
 
         if verbose:
+            pass
+        else:
             click.echo('Using verbose method')
             with open(os.path.join(__location__, './prompts/prompt_summary.md'), 'r') as sp:
-                prompt_txt = sp.read()
+                summary_prompt = sp.read()
                 sp.close()
             with open(os.path.join(__location__, "./prompts/prompt_message.md"), 'r') as mp:
-                message_txt = mp.read()
+                message_prompt = mp.read()
                 mp.close()
-            message = generator.generate_verbose_message(diff_text, style, prompt_txt, message_txt, length)
-        else:
-            click.echo('Using short method')
-            with open(os.path.join(__location__, './prompts/prompt_2.md'), 'r') as sp:
-                short_prompt = sp.read()
-                sp.close()
-            message = generator.generate_message(diff_text, style, prompt_txt, "Summerize the git diff provided, {git_diff}",length)
+            message = generator.generate_message(diff_text, style, summary_prompt, message_prompt, length)
         
 
     finally:
