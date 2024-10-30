@@ -3,7 +3,6 @@
     "length": 72,
     "llm": "ollama",
     "model": "gemma2",
-    "verbose": "False",
     "branch": "",
     "diff_path": "",
     "open_ai_api": "",

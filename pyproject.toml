@@ -10,10 +10,11 @@ python = "^3.10"
 langchain-ollama = "^0.2.0"
 langchain-openai = "^0.2.4"
 click = ">=8.1"
+langchain-core = "^0.3.13"
 
 
 [tool.poetry.scripts]
-gitpt = "gitpt.gitpt:create_message"
+gitpt = "gitpt.gitpt:cli"
 
 [build-system]
 requires = ["poetry-core"]
