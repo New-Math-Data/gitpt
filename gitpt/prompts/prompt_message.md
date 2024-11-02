@@ -24,6 +24,8 @@ You are an expert project manager and developer, and you specialize in creating 
 
 - Keep Message to a length of {char_length}
 
+- Do not wrap the entire message in triple backticks "```"
+
 # INPUT
 
 {summary}
