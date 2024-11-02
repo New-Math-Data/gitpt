@@ -4,12 +4,24 @@
 Hackathon 4 - October 2024
 
 ## Development Instructions
-1. Download ollama from https://ollama.com/
-1. In the terminal run `ollama pull gemma2`
-   ( the model will be downloaded into `~/.ollama/models/blobs` on mac)
-1. Create virtual environment for python: `python -m venv venv`
-1. Activate virtual environemnt: `source venv/bin/activate`
-1. Install requirements: `pip install -r requirements.txt`
-1. CD into folder of project
-1. Install project into venv `pip install --editable .` Setup file will create keyword to utilize cli
-1. Type `gitpt` to interact with cli, `gitpt --help` to see available options to pass.
+
+1. **Download the Model**
+   - Download Ollama from [https://ollama.com/](https://ollama.com/)
+   - In the terminal, run `ollama pull gemma2`  
+     (The model will be downloaded into `~/.ollama/models/blobs` on Mac)
+
+2. **Set Up Python Virtual Environment and Install Poetry**
+   - Create a virtual environment: `python -m venv venv`
+   - Activate the virtual environment: `source venv/bin/activate`
+   - Install Poetry if it’s not already installed: `pip install poetry`
+
+3. **Install Project Dependencies**
+   - CD into the project folder.
+   - Use Poetry to install the project in editable mode: `poetry install`
+   - This will install the dependencies specified in `pyproject.toml` and set up the project for CLI use.
+
+4. **Run GitPT**
+   - To interact with the CLI, type `gitpt`
+   - Use `gitpt --help` to see available options and commands. 
+
+---
