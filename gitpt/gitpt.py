@@ -207,4 +207,4 @@ def commit_changes(message):
 
 
 def main():
-    cli(auto_envvar_prefix="GITPT")
+    cli(auto_envvar_prefix="GITPT_")
