@@ -15,7 +15,7 @@ langchain-anthropic = "^0.2.3"
 
 
 [tool.poetry.scripts]
-gitpt = "gitpt.gitpt:cli"
+gitpt = "gitpt.gitpt:main"
 
 [build-system]
 requires = ["poetry-core"]
