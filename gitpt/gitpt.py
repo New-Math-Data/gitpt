@@ -83,12 +83,11 @@ def create_message(verbose, length, branch, diff, diff_path, style, model):
             click.echo("No diff detected. Be sure you stage your files with 'git add' before running this process. Exiting...")
             exit = True
             sys.exit(999)
-
+        message = generator.generate_verbose_message(diff_text, style, prompt_txt)
         if verbose:
-            message = generator.generate_verbose_message(diff_text, style, prompt_txt)
             click.echo(f"Verbose Message: {message}")
         else:
-            message = generator.generate_short_message(diff_text, length, short_prompt, style)
+            message = generator.generate_short_message(message, length, short_prompt, style)
         
 
     finally:
