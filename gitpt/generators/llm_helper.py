@@ -84,7 +84,7 @@ class OpenAICommentGenerator(BaseCommentGenerator):
                 self.model = "gemma2"
                 return super().create_generator()
         else:
-            log.error(f"Failed to get API Key, using Ollama with Gemma2")
+            log.error("Failed to get API Key, using Ollama with Gemma2")
             self.model = "gemma2"
             return super().create_generator()
 
@@ -112,7 +112,7 @@ class ClaudeCommentGenerator(BaseCommentGenerator):
                 self.model = "gemma2"
                 return super().create_generator()
         else:
-            log.error(f"Failed to get API Key, using Ollama with Gemma2")
+            log.error("Failed to get API Key, using Ollama with Gemma2")
             self.model = "gemma2"
             return super().create_generator()
 
@@ -140,6 +140,6 @@ class GeminiCommentGenerator(BaseCommentGenerator):
                 self.model = "gemma2"
                 return super().create_generator()
         else:
-            log.error(f"Failed to get API Key, using Ollama with Gemma2")
+            log.error("Failed to get API Key, using Ollama with Gemma2")
             self.model = "gemma2"
             return super().create_generator()
