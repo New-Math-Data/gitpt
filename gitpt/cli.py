@@ -4,7 +4,7 @@ import sys
 
 import click
 
-from gitpt.generators.llm_helper import (
+from gitpt.generators.comments import (
     BaseCommentGenerator,
     OpenAICommentGenerator,
     ClaudeCommentGenerator,
