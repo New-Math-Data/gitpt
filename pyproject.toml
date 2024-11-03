@@ -16,7 +16,7 @@ langchain-google-genai = "^2.0.4"
 
 
 [tool.poetry.scripts]
-gitpt = "gitpt.gitpt:main"
+gitpt = "gitpt.cli:main"
 
 [build-system]
 requires = ["poetry-core"]

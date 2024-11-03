@@ -1,9 +1,32 @@
-import click
 import os
 import subprocess
 import sys
+
+import click
+
+from gitpt.utils.llm_helper import (
+    BaseCommentGenerator,
+    OpenAICommentGenerator,
+    ClaudeCommentGenerator,
+    GeminiCommentGenerator,
+)
 from gitpt.utils.spinner import spinner
-from gitpt.utils.llm_helper import CommentGenerator
+
+if os.path.exists("logging.conf"):
+    import logging.config
+
+    logging.config.fileConfig("logging.conf")
+    log = logging.getLogger(__name__)
+else:
+    import logging
+
+    log = logging.getLogger(__name__)
+    log.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+    log.addHandler(handler)
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -39,12 +62,19 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
     "--claude-api-key",
     help="API key for Claude AI",
 )
-@click.option(
-    "--google-api-key",
-    help="API key for Google AI"
-)
+@click.option("--google-api-key", help="API key for Google AI")
 @click.pass_context
-def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key, google_api_key):
+def cli(
+    ctx,
+    style,
+    length,
+    llm,
+    model,
+    verbose,
+    openai_api_key,
+    claude_api_key,
+    google_api_key,
+):
     # Load config file and store in context object
     ctx.ensure_object(dict)
 
@@ -56,7 +86,7 @@ def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key,
         "verbose": verbose,
         "open_ai_api": openai_api_key,
         "claude_ai_api": claude_api_key,
-        "google_ai_api": google_api_key
+        "google_ai_api": google_api_key,
     }
 
     ctx.obj["config"] = config
@@ -128,18 +158,27 @@ def create_message(ctx, branch, diff, diff_path):
         else (
             ctx.obj["config"]["open_ai_api"]
             if ctx.obj["config"]["llm"] == "openai"
-        else (
-            ctx.obj["config"]["google_ai_api"]
-            if ctx.obj["config"]["llm"] == "google"
-        else
-        ""
-        ))
+            else (
+                ctx.obj["config"]["google_ai_api"]
+                if ctx.obj["config"]["llm"] == "google"
+                else ""
+            )
+        )
     )
-    generator = CommentGenerator(
-        ctx.obj["config"]["llm"],
-        ctx.obj["config"]["model"],
-        api_key,
-    )
+    if ctx.obj["config"]["llm"] == "claude":
+        generator = ClaudeCommentGenerator(ctx.obj["config"]["model"], api_key)
+    elif ctx.obj["config"]["llm"] == "openai":
+        generator = OpenAICommentGenerator(ctx.obj["config"]["model"], api_key)
+    elif ctx.obj["config"]["llm"] == "google":
+        generator = GeminiCommentGenerator(ctx.obj["config"]["model"], api_key)
+    else:
+        generator = BaseCommentGenerator(ctx.obj["config"]["model"])
+
+    # generator = CommentGenerator(
+    #     ctx.obj["config"]["llm"],
+    #     ctx.obj["config"]["model"],
+    #     api_key,
+    # )
 
     # Start Spinner
     stop_spinner = spinner()
@@ -162,12 +201,27 @@ def create_message(ctx, branch, diff, diff_path):
             )
             exit = True
             sys.exit(999)
-        message = generator.generate_verbose_message(diff_text, style, prompt_txt)
-        if verbose:
-            click.echo(f"Verbose Message: {message}")
+
+        if ctx.obj["config"]["verbose"]:
+            pass
         else:
-            message = generator.generate_short_message(
-                message, length, short_prompt, style
+            click.echo("Using verbose method")
+            with open(
+                os.path.join(__location__, "./prompts/prompt_summary.md"), "r"
+            ) as sp:
+                summary_prompt = sp.read()
+                sp.close()
+            with open(
+                os.path.join(__location__, "./prompts/prompt_message.md"), "r"
+            ) as mp:
+                message_prompt = mp.read()
+                mp.close()
+            message = generator.generate_message(
+                diff_text,
+                ctx.obj["config"]["style"],
+                summary_prompt,
+                message_prompt,
+                ctx.obj["config"]["length"],
             )
 
     finally:
