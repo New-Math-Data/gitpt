@@ -21,14 +21,14 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 )
 @click.option(
     "--llm",
-    type=click.Choice(["ollama", "openai", "claude"]),
+    type=click.Choice(["ollama", "openai", "claude", "google"]),
     default="ollama",
     help="LLM to use, (OpenAI, Ollama, Claude)",
 )
 @click.option(
     "--model",
     default="gemma2",
-    help="LLM model to use (gemma2 for Ollama, gpt-4o for OpenAI)",
+    help="LLM model to use (gemma2 for Ollama, gpt-4o for OpenAI, etc)",
 )
 @click.option("--verbose", default=False)
 @click.option(
@@ -39,8 +39,12 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
     "--claude-api-key",
     help="API key for Claude AI",
 )
+@click.option(
+    "--google-api-key",
+    help="API key for Google AI"
+)
 @click.pass_context
-def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key):
+def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key, google_api_key):
     # Load config file and store in context object
     ctx.ensure_object(dict)
 
@@ -52,6 +56,7 @@ def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key)
         "verbose": verbose,
         "open_ai_api": openai_api_key,
         "claude_ai_api": claude_api_key,
+        "google_ai_api": google_api_key
     }
 
     ctx.obj["config"] = config
@@ -123,8 +128,12 @@ def create_message(ctx, branch, diff, diff_path):
         else (
             ctx.obj["config"]["open_ai_api"]
             if ctx.obj["config"]["llm"] == "openai"
-            else ""
-        )
+        else (
+            ctx.obj["config"]["google_ai_api"]
+            if ctx.obj["config"]["llm"] == "google"
+        else
+        ""
+        ))
     )
     generator = CommentGenerator(
         ctx.obj["config"]["llm"],

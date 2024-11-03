@@ -54,6 +54,26 @@ class CommentGenerator():
                 print(f"Failed to get API Key, using Ollama with Gemma2")
                 self.model = 'gemma2'
 
+        elif self.llm == 'google':
+            # Check for API key
+            if self.api_key != '':
+                from langchain_google_genai import ChatGoogleGenerativeAI
+
+                try:
+                    generator = ChatGoogleGenerativeAI(
+                        model=self.model,
+                        temperature = self.TEMP,
+                        api_key = self.api_key,
+                        top_p = self.TOP_P,
+                        top_k = self.TOP_K
+                    )
+                    return generator
+                except Exception as e:
+                    print(f"Error: {e}")
+            else:
+                print("Failed to get API Key, using Ollama with Gemma2")
+                self.model = 'gemma2'
+
         # Use Ollama if no other model passed in
         from langchain_ollama import ChatOllama
 
