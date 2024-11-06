@@ -11,17 +11,19 @@ from gitpt.generators.comments import (
     GeminiCommentGenerator,
 )
 from gitpt.utils.spinner import spinner
+from gitpt.utils.config import read_toml_file
+
 
 if os.path.exists("logging.conf"):
     import logging.config
 
     logging.config.fileConfig("logging.conf")
-    log = logging.getLogger(__name__)
+    log = logging.getLogger()
 else:
     import logging
 
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.INFO)
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
     handler.setFormatter(
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -89,6 +91,10 @@ def cli(
         "google_ai_api": google_api_key,
     }
 
+    toml_config = read_toml_file("tool.gitpt.config")
+
+    log.debug(toml_config)
+
     ctx.obj["config"] = config
     pass
     # ctx.obj["config"] = load_config(config_file)
@@ -114,7 +120,13 @@ def cli(
     type=click.Path(exists=True),
     help="The path to a file containing the git diff.",
 )
-def create_message(ctx, branch, diff, diff_path):
+@click.option(
+    "--auto-confirm",
+    "-y",
+    is_flag=True,
+    help="Automatically confirm the commit message without prompting.",
+)
+def create_message(ctx, branch, diff, diff_path, auto_confirm):
     """
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
@@ -228,19 +240,20 @@ def create_message(ctx, branch, diff, diff_path):
         stop_spinner.set()
         if not exit:
             try:
-                commit_changes(message)
+                commit_changes(message, auto_confirm=auto_confirm)
             except Exception as e:
                 click.echo(f"Task Aborted: {e}")
 
 
-def commit_changes(message):
+def commit_changes(message, auto_confirm=False):
     """Commit changes using message generated"""
 
     if message != "":
         message = message.replace('"', '\\"').strip()
 
         click.echo(f"Committing with message: {message}")
-        click.confirm("Do you want to commit with this message?", abort=True)
+        if not auto_confirm:
+            click.confirm("Do you want to commit with this message?", abort=True)
         # Run Bash Script to commit using message
         subprocess.run(["git", "commit", "-m", message], check=True)
 

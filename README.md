@@ -59,4 +59,7 @@ The `gitpt commit` command helps you generate meaningful commit messages for you
    - To interact with the CLI, type `gitpt`
    - Use `gitpt --help` to see available options and commands. 
 
+6. Setup GitPT to use NMD OpenAI:
+   - `hcp vault-secrets run env --app gitpt-setup | grep GITPT >> .env`
+
 ---
