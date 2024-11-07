@@ -40,6 +40,11 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
     default="professional",
 )
 @click.option(
+    "--prefix",
+    default=None,
+    help="Optional prefix for the commit message (bugfix, feature, etc)",
+)
+@click.option(
     "--length",
     type=click.IntRange(min=50, max=72),
     default=72,
@@ -69,6 +74,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 def cli(
     ctx,
     style,
+    prefix,
     length,
     llm,
     model,
@@ -82,6 +88,7 @@ def cli(
 
     config = {
         "style": style,
+        "prefix": prefix,
         "length": length,
         "llm": llm,
         "model": model,
@@ -137,6 +144,9 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
     click.echo(f"Style: {ctx.obj['config']['style']}")
     click.echo(f"Max Length: {ctx.obj['config']['length']} characters")
     click.echo(f"Verbose setting: {ctx.obj['config']['verbose']}")
+
+    if ctx.obj["config"]["prefix"]:
+        click.echo(f"Prefix: {ctx.obj['config']['prefix']}")
 
     if branch:
         click.echo(f"Branch: {branch}")
@@ -223,11 +233,18 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
             ) as sp:
                 summary_prompt = sp.read()
                 sp.close()
-            with open(
-                os.path.join(__location__, "./prompts/prompt_message.md"), "r"
-            ) as mp:
-                message_prompt = mp.read()
-                mp.close()
+            if ctx.obj["config"]["prefix"]:
+                with open(
+                    os.path.join(__location__, "./prompts/prompt_message_no_prefix.md"), "r"
+                ) as mp:
+                    message_prompt = mp.read()
+                    mp.close()
+            else:
+                with open(
+                    os.path.join(__location__, "./prompts/prompt_message.md"), "r"
+                ) as mp:
+                    message_prompt = mp.read()
+                    mp.close()
             message = generator.generate_message(
                 diff_text,
                 ctx.obj["config"]["style"],
@@ -240,16 +257,18 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
         stop_spinner.set()
         if not exit:
             try:
-                commit_changes(message, auto_confirm=auto_confirm)
+                commit_changes(ctx,message, auto_confirm=auto_confirm)
             except Exception as e:
                 click.echo(f"Task Aborted: {e}")
 
 
-def commit_changes(message, auto_confirm=False):
+def commit_changes(ctx,message, auto_confirm=False):
     """Commit changes using message generated"""
 
     if message != "":
         message = message.replace('"', '\\"').strip()
+        if ctx.obj["config"]["prefix"]:
+            message = f"{ctx.obj["config"]["prefix"]}:{message}"
 
         click.echo(f"Committing with message: {message}")
         if not auto_confirm:
