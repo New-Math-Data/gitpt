@@ -56,6 +56,7 @@ The `gitpt commit` command helps you generate meaningful commit messages for you
 | GITPT__LENGTH | Maximum length of commit messages | 72 |   - Adjust the values according to your needs and API access.
 
 5. **Run GitPT**
+   - Run `pip install --editable .` to create CLI tool
    - To interact with the CLI, type `gitpt`
    - Use `gitpt --help` to see available options and commands. 
 

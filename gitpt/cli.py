@@ -228,12 +228,14 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
             pass
         else:
             click.echo("Using verbose method")
+            length = ctx.obj["config"]["length"]
             with open(
                 os.path.join(__location__, "./prompts/prompt_summary.md"), "r"
             ) as sp:
                 summary_prompt = sp.read()
                 sp.close()
             if ctx.obj["config"]["prefix"]:
+                length = length - len(ctx.obj["config"]["prefix"])
                 with open(
                     os.path.join(__location__, "./prompts/prompt_message_no_prefix.md"), "r"
                 ) as mp:
@@ -245,12 +247,13 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
                 ) as mp:
                     message_prompt = mp.read()
                     mp.close()
+
             message = generator.generate_message(
                 diff_text,
                 ctx.obj["config"]["style"],
                 summary_prompt,
                 message_prompt,
-                ctx.obj["config"]["length"],
+                length,
             )
 
     finally:
@@ -268,7 +271,7 @@ def commit_changes(ctx,message, auto_confirm=False):
     if message != "":
         message = message.replace('"', '\\"').strip()
         if ctx.obj["config"]["prefix"]:
-            message = f"{ctx.obj["config"]["prefix"]}:{message}"
+            message = f"{ctx.obj["config"]["prefix"]}: {message}"
 
         click.echo(f"Committing with message: {message}")
         if not auto_confirm:
