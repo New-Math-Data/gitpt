@@ -1,9 +1,34 @@
-import click
 import os
 import subprocess
 import sys
+
+import click
+
+from gitpt.generators.comments import (
+    BaseCommentGenerator,
+    OpenAICommentGenerator,
+    ClaudeCommentGenerator,
+    GeminiCommentGenerator,
+)
 from gitpt.utils.spinner import spinner
-from gitpt.utils.llm_helper import CommentGenerator
+from gitpt.utils.config import read_toml_file
+
+
+if os.path.exists("logging.conf"):
+    import logging.config
+
+    logging.config.fileConfig("logging.conf")
+    log = logging.getLogger()
+else:
+    import logging
+
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+    log.addHandler(handler)
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -39,12 +64,19 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
     "--claude-api-key",
     help="API key for Claude AI",
 )
-@click.option(
-    "--google-api-key",
-    help="API key for Google AI"
-)
+@click.option("--google-api-key", help="API key for Google AI")
 @click.pass_context
-def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key, google_api_key):
+def cli(
+    ctx,
+    style,
+    length,
+    llm,
+    model,
+    verbose,
+    openai_api_key,
+    claude_api_key,
+    google_api_key,
+):
     # Load config file and store in context object
     ctx.ensure_object(dict)
 
@@ -56,8 +88,12 @@ def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key,
         "verbose": verbose,
         "open_ai_api": openai_api_key,
         "claude_ai_api": claude_api_key,
-        "google_ai_api": google_api_key
+        "google_ai_api": google_api_key,
     }
+
+    toml_config = read_toml_file("tool.gitpt.config")
+
+    log.debug(toml_config)
 
     ctx.obj["config"] = config
     pass
@@ -84,7 +120,13 @@ def cli(ctx, style, length, llm, model, verbose, openai_api_key, claude_api_key,
     type=click.Path(exists=True),
     help="The path to a file containing the git diff.",
 )
-def create_message(ctx, branch, diff, diff_path):
+@click.option(
+    "--auto-confirm",
+    "-y",
+    is_flag=True,
+    help="Automatically confirm the commit message without prompting.",
+)
+def create_message(ctx, branch, diff, diff_path, auto_confirm):
     """
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
@@ -128,18 +170,27 @@ def create_message(ctx, branch, diff, diff_path):
         else (
             ctx.obj["config"]["open_ai_api"]
             if ctx.obj["config"]["llm"] == "openai"
-        else (
-            ctx.obj["config"]["google_ai_api"]
-            if ctx.obj["config"]["llm"] == "google"
-        else
-        ""
-        ))
+            else (
+                ctx.obj["config"]["google_ai_api"]
+                if ctx.obj["config"]["llm"] == "google"
+                else ""
+            )
+        )
     )
-    generator = CommentGenerator(
-        ctx.obj["config"]["llm"],
-        ctx.obj["config"]["model"],
-        api_key,
-    )
+    if ctx.obj["config"]["llm"] == "claude":
+        generator = ClaudeCommentGenerator(ctx.obj["config"]["model"], api_key)
+    elif ctx.obj["config"]["llm"] == "openai":
+        generator = OpenAICommentGenerator(ctx.obj["config"]["model"], api_key)
+    elif ctx.obj["config"]["llm"] == "google":
+        generator = GeminiCommentGenerator(ctx.obj["config"]["model"], api_key)
+    else:
+        generator = BaseCommentGenerator(ctx.obj["config"]["model"])
+
+    # generator = CommentGenerator(
+    #     ctx.obj["config"]["llm"],
+    #     ctx.obj["config"]["model"],
+    #     api_key,
+    # )
 
     # Start Spinner
     stop_spinner = spinner()
@@ -189,19 +240,20 @@ def create_message(ctx, branch, diff, diff_path):
         stop_spinner.set()
         if not exit:
             try:
-                commit_changes(message)
+                commit_changes(message, auto_confirm=auto_confirm)
             except Exception as e:
                 click.echo(f"Task Aborted: {e}")
 
 
-def commit_changes(message):
+def commit_changes(message, auto_confirm=False):
     """Commit changes using message generated"""
 
     if message != "":
         message = message.replace('"', '\\"').strip()
 
         click.echo(f"Committing with message: {message}")
-        click.confirm("Do you want to commit with this message?", abort=True)
+        if not auto_confirm:
+            click.confirm("Do you want to commit with this message?", abort=True)
         # Run Bash Script to commit using message
         subprocess.run(["git", "commit", "-m", message], check=True)
 
