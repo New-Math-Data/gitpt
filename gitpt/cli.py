@@ -126,7 +126,13 @@ def cli(
     is_flag=True,
     help="Automatically confirm the commit message without prompting.",
 )
-def create_message(ctx, branch, diff, diff_path, auto_confirm):
+@click.option(
+    "--add",
+    "-a",
+    is_flag=True, default=False,
+    help="Automatically stage files that have been modified and deleted, new files will not be added"
+)
+def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
     """
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
@@ -145,6 +151,11 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
         click.echo(f"Diff (text): {diff}")
         # Set diff text to diff_text variable
         diff_text = diff
+
+    if add:
+        click.echo(f"Added all tracked files")
+        subprocess.run(["git", "add",  "-u"], check=True)
+
 
     if ctx.obj["config"]["model"]:
         click.echo(
@@ -186,12 +197,6 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
     else:
         generator = BaseCommentGenerator(ctx.obj["config"]["model"])
 
-    # generator = CommentGenerator(
-    #     ctx.obj["config"]["llm"],
-    #     ctx.obj["config"]["model"],
-    #     api_key,
-    # )
-
     # Start Spinner
     stop_spinner = spinner()
     message = ""
@@ -200,11 +205,10 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm):
         exit = False
         if not diff_text.strip():
             diff_text = subprocess.run(
-                ["git diff --staged"],
+                ["git", "diff", "--staged"],
                 check=True,
                 capture_output=True,
                 text=True,
-                shell=True,
             ).stdout
 
         if not diff_text.strip():
