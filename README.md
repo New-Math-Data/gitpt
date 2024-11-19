@@ -1,6 +1,16 @@
 # GitPT
 
-## Using GitPT Commit CLI
+## Overview
+Welcome to the repo for GitPT, the command line utility that uses an LLM to generate git commit messages for you. Save your brain cycles for something other than writing meaningful commit messages. Choose from LLMs installed on your machine or use API access. Select the message style that matches your codebase and personality: professional, funny, or intrinsic.
+
+Remember: LLMs are used to generate the messages. LLMs make mistakes. Verify all responses created by GitPT
+
+## Common Scenarios
+If you’d like to get the repo working on your machine, follow [these steps](#setup-your-machine-for-development).
+
+If you'd like to install the tool directly, follow these steps (TBD).
+
+## Usage Instructions
 
 The `gitpt commit` command helps you generate meaningful commit messages for your git changes. Here's how to use it:
 
@@ -24,7 +34,7 @@ The `gitpt commit` command helps you generate meaningful commit messages for you
    # Conversational style with 50 char limit
    gitpt commit --style professional --length 50
 
-## Development Instructions
+## Setup Your Machine for Development
 
 1. **Download the Model**
    - Download Ollama from [https://ollama.com/](https://ollama.com/)
