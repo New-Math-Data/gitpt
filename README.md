@@ -13,8 +13,9 @@ If you'd like to install the tool directly, follow these steps (TBD).
 ## Setup Your Machine for Development
 
 ### Assumptions
-1. You already have git installed and working
-1. You are familiar with Python and creating virtual environments
+1. You already have Git installed and working.
+1. You are familiar with Python and creating virtual environments.
+1. You are able to access a LLM (either locally or with an API key). 
 
 ### Steps
 1. **Set Up for Local LLM**
@@ -47,7 +48,7 @@ If you'd like to install the tool directly, follow these steps (TBD).
 
 ## Usage Instructions
 
-The `gitpt commit` command helps you generate meaningful commit messages for your git changes. Here's how to use it:
+The `gitpt commit` command helps you generate meaningful commit messages for your Git changes. Here's how to use it:
 
 1. **Basic Usage**
    ```bash
