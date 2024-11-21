@@ -23,7 +23,7 @@ If you'd like to install the tool directly, follow these steps (TBD).
    - Follow the Ollama instructions for pulling gemma2.
       - For Mac, run `ollama pull gemma2` in the Terminal and wait for the model to be downloaded into `~/.ollama/models/blobs`
 
-1. **Use Git to Clone this Repo
+1. **Use Git to Clone this Repo**
    
 1. **Set Up Python Virtual Environment and Install Poetry**
    - Follow the [venv directions](https://docs.python.org/3/library/venv.html) for creating a virtual environment. For example: `python -m venv venv`
