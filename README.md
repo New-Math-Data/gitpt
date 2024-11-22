@@ -50,9 +50,6 @@ Use the developer documentation to review the API pricing and obtain your API ke
    - Use `gitpt --help` to see available options and commands.
    - See additional [Usage Instructions](#usage-instructions)  
 
-1. Setup GitPT to use NMD OpenAI:
-   - `hcp vault-secrets run env --app gitpt-setup | grep GITPT >> .env`
-
 ## Usage Instructions
 
 The `gitpt commit` command helps you generate meaningful commit messages for your Git changes. Here's how to use it:
