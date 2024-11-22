@@ -17,11 +17,17 @@ If you'd like to install the tool directly, follow these steps (TBD).
 1. You are familiar with Python and creating virtual environments.
 1. You are able to access a LLM (either locally or with an API key). 
 
-### Steps
-1. **Set Up for Local LLM**
+### Decide about LLM Access
+**If you prefer a local LLM**
+   - Be sure your machine can handle the system requirements. Specifics in the [Ollama documentation].(https://github.com/ollama/ollama/blob/main/README.md#quickstart) 
    - Download [Ollama](https://ollama.com/) and install it. 
    - Follow the Ollama instructions for pulling gemma2.
       - For Mac, run `ollama pull gemma2` in the Terminal and wait for the model to be downloaded into `~/.ollama/models/blobs`
+
+**If you prefer API Access**
+Use the developer documentation to review the API pricing and obtain your API key. For example, at the time of writing, Gemini allows 1,500 requests per day free. 
+
+### Steps
 
 1. **Use Git to Clone this Repo**
    
