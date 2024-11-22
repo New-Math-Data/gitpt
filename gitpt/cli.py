@@ -95,6 +95,10 @@ def cli(
 
     log.debug(toml_config)
 
+    if toml_config:
+        for key, value in toml_config.items():
+            config.setdefault(key, value)
+
     ctx.obj["config"] = config
     pass
     # ctx.obj["config"] = load_config(config_file)

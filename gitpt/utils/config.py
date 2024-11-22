@@ -1,4 +1,5 @@
 import logging
+import os
 
 import tomli
 
@@ -32,8 +33,11 @@ def get_toml_path(toml_data, path):
 def read_toml_file(path: str, file_path: str = "./pyproject.toml"):
     log.info("reading toml file")
 
-    with open(file_path, "rb") as f:
-        toml_data = tomli.load(f)
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            toml_data = tomli.load(f)
+    else:
+        return None
 
     log.debug(toml_data)
     log.debug(path)
