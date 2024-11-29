@@ -13,7 +13,6 @@ from gitpt.generators.comments import (
 from gitpt.utils.spinner import spinner
 from gitpt.utils.config import read_toml_file
 
-
 if os.path.exists("logging.conf"):
     import logging.config
 
@@ -55,7 +54,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
     default="gemma2",
     help="LLM model to use (gemma2 for Ollama, gpt-4o for OpenAI, etc)",
 )
-@click.option("--verbose", default=False)
+# @click.option("--verbose", default=False)
 @click.option(
     "--openai-api-key",
     help="API key for OpenAI account",
@@ -67,15 +66,15 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 @click.option("--google-api-key", help="API key for Google AI")
 @click.pass_context
 def cli(
-    ctx,
-    style,
-    length,
-    llm,
-    model,
-    verbose,
-    openai_api_key,
-    claude_api_key,
-    google_api_key,
+        ctx,
+        style,
+        length,
+        llm,
+        model,
+        #  verbose,
+        openai_api_key,
+        claude_api_key,
+        google_api_key,
 ):
     # Load config file and store in context object
     ctx.ensure_object(dict)
@@ -85,7 +84,7 @@ def cli(
         "length": length,
         "llm": llm,
         "model": model,
-        "verbose": verbose,
+        #   "verbose": verbose,
         "open_ai_api": openai_api_key,
         "claude_ai_api": claude_api_key,
         "google_ai_api": google_api_key,
@@ -146,7 +145,7 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
     click.echo("Generating commit message with the following options:")
     click.echo(f"Style: {ctx.obj['config']['style']}")
     click.echo(f"Max Length: {ctx.obj['config']['length']} characters")
-    click.echo(f"Verbose setting: {ctx.obj['config']['verbose']}")
+    #   click.echo(f"Verbose setting: {ctx.obj['config']['verbose']}")
 
     if branch:
         click.echo(f"Branch: {branch}")
@@ -158,8 +157,7 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
 
     if add:
         click.echo(f"Added all tracked files")
-        subprocess.run(["git", "add",  "-u"], check=True)
-
+        subprocess.run(["git", "add", "-u"], check=True)
 
     if ctx.obj["config"]["model"]:
         click.echo(
@@ -175,8 +173,8 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
         except Exception as e:
             click.echo(f"Error opening file: {e}")
 
-    if ctx.obj["config"]["verbose"]:
-        click.echo("Verbose mode enabled.")
+    #   if ctx.obj["config"]["verbose"]:
+    #       click.echo("Verbose mode enabled.")
 
     # Create LLM Generator
     api_key = (
@@ -192,6 +190,7 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
             )
         )
     )
+
     if ctx.obj["config"]["llm"] == "claude":
         generator = ClaudeCommentGenerator(ctx.obj["config"]["model"], api_key)
     elif ctx.obj["config"]["llm"] == "openai":
@@ -222,27 +221,27 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
             exit = True
             sys.exit(999)
 
-        if ctx.obj["config"]["verbose"]:
-            pass
-        else:
-            click.echo("Using verbose method")
-            with open(
+        #  if ctx.obj["config"]["verbose"]:
+        #      pass
+        #  else:
+        # click.echo("Using verbose method")
+        with open(
                 os.path.join(__location__, "./prompts/prompt_summary.md"), "r"
-            ) as sp:
-                summary_prompt = sp.read()
-                sp.close()
-            with open(
+        ) as sp:
+            summary_prompt = sp.read()
+            sp.close()
+        with open(
                 os.path.join(__location__, "./prompts/prompt_message.md"), "r"
-            ) as mp:
-                message_prompt = mp.read()
-                mp.close()
-            message = generator.generate_message(
-                diff_text,
-                ctx.obj["config"]["style"],
-                summary_prompt,
-                message_prompt,
-                ctx.obj["config"]["length"],
-            )
+        ) as mp:
+            message_prompt = mp.read()
+            mp.close()
+        message = generator.generate_message(
+            diff_text,
+            ctx.obj["config"]["style"],
+            summary_prompt,
+            message_prompt,
+            ctx.obj["config"]["length"],
+        )
 
     finally:
         stop_spinner.set()
