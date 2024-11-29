@@ -105,13 +105,13 @@ def cli(
 
 @cli.command("commit")
 @click.pass_context
-@click.option(
-    "--branch",
-    "-b",
-    type=click.STRING,
-    help="The branch name to include in the commit message.",
-    default=None,
-)
+# @click.option(
+#    "--branch",
+#    "-b",
+#    type=click.STRING,
+#    help="The branch name to include in the commit message.",
+#    default=None,
+# )
 @click.option(
     "--diff",
     type=click.STRING,
@@ -135,7 +135,7 @@ def cli(
     is_flag=True, default=False,
     help="Automatically stage files that have been modified and deleted, new files will not be added"
 )
-def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
+def create_message(ctx, diff, diff_path, auto_confirm, add):
     """
     CLI tool for generating meaningful git commit messages based on the provided options.
     """
@@ -147,8 +147,14 @@ def create_message(ctx, branch, diff, diff_path, auto_confirm, add):
     click.echo(f"Max Length: {ctx.obj['config']['length']} characters")
     #   click.echo(f"Verbose setting: {ctx.obj['config']['verbose']}")
 
-    if branch:
-        click.echo(f"Branch: {branch}")
+    # if branch:
+    #    click.echo(f"Branch: {branch}")
+    if ctx.obj["config"]["llm"] == "openai":
+        ctx.obj["config"]["model"] = "gpt-4o-mini"
+    elif ctx.obj["config"]["llm"] == "claude":
+        ctx.obj["config"]["model"] = "claude-3-5-haiku-latest"
+    elif ctx.obj["config"]["llm"] == "google":
+        ctx.obj["config"]["model"] = "gemini-1.5-flash"
 
     if diff:
         click.echo(f"Diff (text): {diff}")
