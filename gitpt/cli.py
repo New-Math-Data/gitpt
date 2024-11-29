@@ -167,7 +167,7 @@ def create_message(ctx, diff, diff_path, auto_confirm, add):
 
     if ctx.obj["config"]["model"]:
         click.echo(
-            f"Using LLM = {ctx.obj['config']['llm']}, with model:{ctx.obj['config']['model']}"
+            f"Using LLM = {ctx.obj['config']['llm']}, with model: {ctx.obj['config']['model']}"
         )
 
     if diff_path:
