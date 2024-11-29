@@ -48,7 +48,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
     "--llm",
     type=click.Choice(["ollama", "openai", "claude", "google"]),
     default="ollama",
-    help="LLM to use, (OpenAI, Ollama, Claude)",
+    help="LLM to use, (OpenAI, Ollama, Claude, Google)",
 )
 @click.option(
     "--model",
