@@ -60,10 +60,10 @@ The `gitpt commit` command helps you generate meaningful commit messages for you
    ```
  ```bash
    # Generate commit message with custom style
-   gitpt commit --style professional
+   gitpt  --style professional commit
 
    # Specify maximum length for commit message
-   gitpt commit --length 50 
+   gitpt --length 50 commit 
    ```
 
 3. **Examples**
@@ -72,7 +72,7 @@ The `gitpt commit` command helps you generate meaningful commit messages for you
    gitpt commit
 
    # Conversational style with 50 char limit
-   gitpt commit --style professional --length 50
+   gitpt --style professional --length 50 commit
 
 
 ### Available Environment Variables
