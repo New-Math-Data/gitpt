@@ -8,8 +8,6 @@ Remember: LLMs are used to generate the messages. LLMs make mistakes. Verify all
 ## Common Scenarios
 If you’d like to get the repo working on your machine, follow [these steps](#setup-your-machine-for-development).
 
-If you'd like to install the tool directly, follow these steps (TBD).
-
 ## Setup Your Machine for Development
 
 ### Assumptions
